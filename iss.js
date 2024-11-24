@@ -27,7 +27,7 @@ const fetchCoordsByIP = (ip,callback) => {
     }
       
     const coordinates = {latitude: body.latitude, longitude: body.longitude};
-    return callback(null, JSON.stringify(coordinates));
+    return callback(null, coordinates);
   });
 
 };
@@ -37,12 +37,41 @@ const fetchISSFlyOverTimes = (coords,callback) => {
     if (error !== null) return callback(error,null);
     
     if (response.statusCode !== 200) {
-      const msg = `Status code ${response.statusCode} when fetching ISS fly times due to:(${body}: ${JSON.stringify(coords)})`;
+      const msg = `Status code ${response.statusCode} when fetching ISS fly times due to:(${body}: ${coords})`;
       return callback(Error(msg),null);
     }
-    const flyOvers = JSON.stringify(body.response);
+    const flyOvers = body.response;
     return callback(null,flyOvers);
   });
 
 };
-module.exports = {fetchMyIp,fetchCoordsByIP,fetchISSFlyOverTimes};
+
+const nextISSTimesForMyLocation = (callback) => {
+ 
+  const flyoverArray = fetchMyIp((error,ip) =>{
+    if (error) {
+      return callback(error,null);
+    }
+    fetchCoordsByIP(ip,(error,coords) =>{
+      if (error) {
+        return callback(error,null);
+      }
+       fetchISSFlyOverTimes(coords,(error,flyOvers) => {
+        if (error) {
+          return callback(error,null);
+        }
+        callback(null,flyOvers);
+       });
+    });
+  });
+};
+const printFlyTimes = (flyOvers) => {
+  for (const obj of  flyOvers){
+    const day = new Date(0);
+    day.setUTCSeconds(obj.risetime);
+    const duration = obj.duration;
+    console.log(`Next pass at ${day} for ${duration} seconds!`);
+  }
+};
+
+module.exports = {nextISSTimesForMyLocation, printFlyTimes};
