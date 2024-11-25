@@ -66,10 +66,10 @@ const nextISSTimesForMyLocation = (callback) => {
   });
 };
 const printFlyTimes = (flyOvers) => {
-  for (const obj of  flyOvers){
+  for (const object of  flyOvers) {
     const day = new Date(0);
-    day.setUTCSeconds(obj.risetime);
-    const duration = obj.duration;
+    day.setUTCSeconds(object.risetime);
+    const duration = object.duration;
     console.log(`Next pass at ${day} for ${duration} seconds!`);
   }
 };
